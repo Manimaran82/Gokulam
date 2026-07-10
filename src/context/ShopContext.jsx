@@ -399,6 +399,10 @@ export const ShopProvider = ({ children }) => {
       paymentMethod: saleData.paymentMethod || 'Cash',
       customerName: saleData.customerName || 'Walk-in Customer',
       customerPhone: saleData.customerPhone || '',
+      shopName: saleData.shopName,
+      shopAddress: saleData.shopAddress,
+      shopPhone: saleData.shopPhone,
+      shopEmail: saleData.shopEmail,
       status: 'Completed'
     };
 

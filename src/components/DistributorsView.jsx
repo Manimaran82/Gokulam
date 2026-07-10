@@ -28,8 +28,11 @@ export default function DistributorsView() {
   const emptyForm = { name: '', contactName: '', phone: '', email: '', address: '', category: 'Electronics', status: 'Active' };
   const [formData, setFormData] = useState(emptyForm);
 
-  // Category options for supplied categories
-  const categories = ['Electronics', 'Accessories', 'Office', 'Kitchenware', 'Other'];
+  // Dynamic categories list (default categories + any manually entered ones)
+  const defaultCategories = ['Electronics', 'Accessories', 'Office', 'Kitchenware', 'Other'];
+  const categories = Array.from(
+    new Set([...defaultCategories, ...distributors.map(d => d.category)])
+  );
 
   // Filters logic
   const filteredDistributors = distributors.filter(dist => {
@@ -309,16 +312,21 @@ export default function DistributorsView() {
               {/* Category and Status */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-650 dark:text-slate-400 block">Main Category</label>
-                  <select
+                  <label className="font-semibold text-slate-650 dark:text-slate-400 block">Main Category *</label>
+                  <input
+                    type="text"
+                    list="distributor-categories"
+                    required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="e.g. Electronics, Groceries..."
                     className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-850 rounded-xl focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium dark:text-slate-200"
-                  >
+                  />
+                  <datalist id="distributor-categories">
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
                 <div className="space-y-1">
                   <label className="font-semibold text-slate-650 dark:text-slate-400 block">Status</label>

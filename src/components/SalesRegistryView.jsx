@@ -49,16 +49,8 @@ export default function SalesRegistryView() {
 
   // Cart Actions
   const addToCart = (product) => {
-    // Check if product is already in cart
     const existing = cart.find(item => item.productId === product.id);
     
-    // Check available stock in current database (factoring in other cart quantities)
-    const currentQtyInCart = existing ? existing.quantity : 0;
-    if (product.stock <= currentQtyInCart) {
-      alert(`Cannot add more. Only ${product.stock} units available in stock.`);
-      return;
-    }
-
     if (existing) {
       setCart(cart.map(item => 
         item.productId === product.id 
@@ -83,11 +75,6 @@ export default function SalesRegistryView() {
     const newQty = item.quantity + amount;
     if (newQty <= 0) {
       removeFromCart(productId);
-      return;
-    }
-
-    if (newQty > item.maxStock) {
-      alert(`Only ${item.maxStock} units of this item are in stock.`);
       return;
     }
 
@@ -137,9 +124,9 @@ export default function SalesRegistryView() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8.5rem)] relative">
+    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8.5rem)] h-auto relative">
       {/* Product Selection Panel */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-full overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm lg:h-full h-auto overflow-hidden">
         {/* Search and Category Filter Headers */}
         <div className="space-y-4 mb-5">
           <div className="relative">
@@ -172,7 +159,7 @@ export default function SalesRegistryView() {
         </div>
 
         {/* Product Catalogue Grid */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] lg:max-h-none">
           {filteredProducts.map((product) => {
             const isOutOfStock = product.stock <= 0;
             const isLowStock = product.stock > 0 && product.stock <= product.minStock;
@@ -183,24 +170,18 @@ export default function SalesRegistryView() {
             return (
               <div 
                 key={product.id}
-                onClick={() => !isOutOfStock && remainingStock > 0 && addToCart(product)}
+                onClick={() => addToCart(product)}
                 className={`p-4 rounded-2xl border flex flex-col justify-between transition-all duration-200 group cursor-pointer ${
-                  isOutOfStock 
-                    ? 'opacity-55 bg-slate-50 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 pointer-events-none'
-                    : remainingStock <= 0 
-                      ? 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800'
-                      : inCartQty > 0
-                        ? 'border-violet-500/80 bg-violet-500/[0.02] dark:bg-violet-500/[0.01]'
-                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/80 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600'
+                  inCartQty > 0
+                    ? 'border-violet-500/80 bg-violet-500/[0.02] dark:bg-violet-500/[0.01]'
+                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/80 hover:shadow-md hover:border-slate-200 dark:hover:border-slate-600'
                 }`}
               >
                 <div className="space-y-1">
                   <div className="flex justify-between items-start">
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{product.category}</span>
                     {isOutOfStock ? (
-                      <span className="bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[9px] px-1.5 py-0.5 rounded-full font-bold">Sold Out</span>
-                    ) : remainingStock <= 0 ? (
-                      <span className="bg-slate-500/10 text-slate-600 dark:text-slate-400 text-[9px] px-1.5 py-0.5 rounded-full font-bold">Cart Maxed</span>
+                      <span className="bg-rose-500/10 text-rose-650 dark:text-rose-455 text-[9px] px-1.5 py-0.5 rounded-full font-bold">Out of Stock</span>
                     ) : isLowStock ? (
                       <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded-full font-bold">Low Stock</span>
                     ) : null}
@@ -215,11 +196,11 @@ export default function SalesRegistryView() {
                     <p className="font-bold text-slate-800 dark:text-slate-100 text-base">₹{product.price.toFixed(2)}</p>
                   </div>
                   <div className="text-right">
-                    <span className={`text-[10px] font-bold ${isOutOfStock ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {isOutOfStock ? 'Out of Stock' : `${remainingStock} Units Left`}
+                    <span className={`text-[10px] font-bold ${isOutOfStock ? 'text-rose-500 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+                      {remainingStock} Units Left
                     </span>
                     {inCartQty > 0 && (
-                      <p className="text-[10px] text-violet-600 dark:text-violet-400 font-bold mt-0.5">{inCartQty} in cart</p>
+                      <p className="text-[10px] text-violet-650 dark:text-violet-400 font-bold mt-0.5">{inCartQty} in cart</p>
                     )}
                   </div>
                 </div>
@@ -236,17 +217,17 @@ export default function SalesRegistryView() {
       </div>
 
       {/* Cart & Checkout Panel */}
-      <div className="w-full lg:w-96 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col h-full overflow-hidden">
+      <div className="w-full lg:w-96 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col lg:h-full h-auto overflow-hidden">
         <div className="flex items-center space-x-2 pb-4 border-b border-slate-100 dark:border-slate-700/60">
           <ShoppingCart className="w-5 h-5 text-violet-500" />
           <h4 className="font-bold text-slate-800 dark:text-slate-100">Checkout Cart</h4>
-          <span className="ml-auto bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-bold">
+          <span className="ml-auto bg-slate-100 dark:bg-slate-900 text-slate-650 dark:text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-bold">
             {cart.reduce((sum, item) => sum + item.quantity, 0)} Items
           </span>
         </div>
 
         {/* Scrollable Cart List */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-3.5 pr-1">
+        <div className="flex-1 overflow-y-auto py-4 space-y-3.5 pr-1 max-h-[300px] lg:max-h-none">
           {cart.map((item) => (
             <div key={item.productId} className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <div className="flex-1 min-w-0 pr-2">
