@@ -10,11 +10,12 @@ import {
   Moon,
   Sun,
   Truck,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
-export default function Sidebar({ activeTab, setActiveTab, darkMode, setDarkMode }) {
+export default function Sidebar({ activeTab, setActiveTab, darkMode, setDarkMode, isSidebarOpen, setIsSidebarOpen }) {
   const { products, shopDetails } = useShop();
 
   // Calculate low stock alert count
@@ -38,55 +39,75 @@ export default function Sidebar({ activeTab, setActiveTab, darkMode, setDarkMode
     : 'GA';
 
   return (
-    <aside className="w-64 bg-slate-900 text-white flex flex-col h-screen fixed left-0 top-0 border-r border-slate-800 shadow-2xl z-30 transition-transform duration-300">
-      {/* Brand logo */}
-      <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-400 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-violet-500/30">
-          {initials}
-        </div>
-        <div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent leading-none">
-            {shopDetails?.name || 'Gokulam Agency'}
-          </h1>
-          <span className="text-xs text-slate-404">Shop Management</span>
-        </div>
-      </div>
+    <>
+      {/* Mobile Sidebar overlay backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-[1px] z-30 md:hidden transition-opacity duration-300"
+        />
+      )}
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
-                isActive 
-                  ? 'bg-violet-600/90 text-white shadow-lg shadow-violet-600/20' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              <Icon className={`w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-105 ${
-                isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
-              }`} />
-              <span>{item.name}</span>
-              
-              {/* Badge for Alerts (e.g. low stock) */}
-              {item.badge && (
-                <span className="ml-auto bg-amber-500 text-slate-950 font-bold text-xs px-2 py-0.5 rounded-full flex items-center space-x-1 animate-pulse">
-                  <AlertTriangle className="w-3 h-3" />
-                  <span>{item.badge}</span>
-                </span>
-              )}
+      <aside className={`w-64 bg-slate-900 text-white flex flex-col h-screen fixed left-0 top-0 border-r border-slate-800 shadow-2xl z-40 transition-transform duration-300 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        {/* Brand logo */}
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-400 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-violet-500/30">
+              {initials}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent leading-none">
+                {shopDetails?.name || 'Gokulam Agency'}
+              </h1>
+              <span className="text-xs text-slate-404">Shop Management</span>
+            </div>
+          </div>
+          {/* Mobile close sidebar X button */}
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1 hover:bg-slate-800 rounded-lg md:hidden text-slate-450 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-              {/* Hover indicator bar */}
-              {isActive && (
-                <div className="absolute left-0 top-3 bottom-3 w-1 bg-white rounded-r-md" />
-              )}
-            </button>
-          );
-        })}
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
+                  isActive 
+                    ? 'bg-violet-600/90 text-white shadow-lg shadow-violet-600/20' 
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <Icon className={`w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-105 ${
+                  isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
+                }`} />
+                <span>{item.name}</span>
+                
+                {/* Badge for Alerts (e.g. low stock) */}
+                {item.badge && (
+                  <span className="ml-auto bg-amber-500 text-slate-950 font-bold text-xs px-2 py-0.5 rounded-full flex items-center space-x-1 animate-pulse">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>{item.badge}</span>
+                  </span>
+                )}
+
+                {/* Hover indicator bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-3 bottom-3 w-1 bg-white rounded-r-md" />
+                )}
+              </button>
+            );
+          })}
       </nav>
 
       {/* Bottom controls / Theme toggler */}
@@ -110,5 +131,6 @@ export default function Sidebar({ activeTab, setActiveTab, darkMode, setDarkMode
         </button>
       </div>
     </aside>
-  );
+  </>
+);
 }
