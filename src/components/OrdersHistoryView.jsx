@@ -19,6 +19,7 @@ export default function OrdersHistoryView() {
   // Search & Filter
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All'); // 'All' | 'Completed' | 'Refunded'
+  const [sortBy, setSortBy] = useState('date-desc'); // 'date-desc' | 'date-asc' | 'total-desc' | 'total-asc' | 'client-name'
 
   // Modal active invoice
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -27,14 +28,23 @@ export default function OrdersHistoryView() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
 
-  // Filters
-  const filteredSales = sales.filter(sale => {
-    const matchesSearch = sale.id.toLowerCase().includes(search.toLowerCase()) ||
-                          sale.customerName.toLowerCase().includes(search.toLowerCase()) ||
-                          (sale.customerPhone && sale.customerPhone.includes(search));
-    const matchesStatus = statusFilter === 'All' || sale.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Filters and Sorting
+  const filteredSales = sales
+    .filter(sale => {
+      const matchesSearch = sale.id.toLowerCase().includes(search.toLowerCase()) ||
+                            sale.customerName.toLowerCase().includes(search.toLowerCase()) ||
+                            (sale.customerPhone && sale.customerPhone.includes(search));
+      const matchesStatus = statusFilter === 'All' || sale.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date-desc') return new Date(b.date) - new Date(a.date);
+      if (sortBy === 'date-asc') return new Date(a.date) - new Date(b.date);
+      if (sortBy === 'total-desc') return b.total - a.total;
+      if (sortBy === 'total-asc') return a.total - b.total;
+      if (sortBy === 'client-name') return a.customerName.localeCompare(b.customerName);
+      return 0;
+    });
 
   const handleRefund = (saleId) => {
     if (window.confirm(`Are you sure you want to void/refund invoice ${saleId}? This will restock all items in the inventory.`)) {
@@ -135,17 +145,34 @@ export default function OrdersHistoryView() {
           />
         </div>
 
-        <div className="flex items-center space-x-1.5 w-full md:w-auto">
-          <span className="text-slate-400 font-semibold">Status:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-850 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium dark:text-slate-200"
-          >
-            <option value="All">All Invoices</option>
-            <option value="Completed">Completed</option>
-            <option value="Refunded">Refunded (Voided)</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-slate-400 font-semibold">Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-850 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium dark:text-slate-200"
+            >
+              <option value="All">All Invoices</option>
+              <option value="Completed">Completed</option>
+              <option value="Refunded">Refunded (Voided)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center space-x-1.5">
+            <span className="text-slate-400 font-semibold">Sort By:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-850 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium dark:text-slate-200"
+            >
+              <option value="date-desc">Date (Newest First)</option>
+              <option value="date-asc">Date (Oldest First)</option>
+              <option value="total-desc">Total (High to Low)</option>
+              <option value="total-asc">Total (Low to High)</option>
+              <option value="client-name">Client Name</option>
+            </select>
+          </div>
         </div>
       </div>
 

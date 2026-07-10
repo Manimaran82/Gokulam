@@ -282,29 +282,7 @@ export const ShopProvider = ({ children }) => {
 
   const [sales, setSales] = useState(() => {
     const saved = localStorage.getItem('apex_sales');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (!parsed.some(s => s.id === 'INV-1015')) {
-        const newBilling = {
-          id: 'INV-1015',
-          date: '2026-07-10T14:20:00.000Z',
-          items: [
-            { productId: 'prod-10', sku: 'ELE-WCH-010', name: 'FitTrack Smart Watch', quantity: 1, price: 139.99, cost: 65.00 },
-            { productId: 'prod-7', sku: 'ELE-CAB-007', name: 'USB-C Fast Cable (2m)', quantity: 3, price: 9.99, cost: 2.10 }
-          ],
-          discount: 10,
-          total: 152.96,
-          totalCost: 71.30,
-          paymentMethod: 'UPI',
-          customerName: 'Sundar Pichai',
-          customerPhone: '555-0820',
-          status: 'Completed'
-        };
-        return [newBilling, ...parsed];
-      }
-      return parsed;
-    }
-    return INITIAL_SALES;
+    return saved ? JSON.parse(saved) : INITIAL_SALES;
   });
 
   const [expenses, setExpenses] = useState(() => {
